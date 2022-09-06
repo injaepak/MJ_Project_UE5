@@ -62,16 +62,15 @@ void AYS_MonsterAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
-	//俊寇贸府
+	////俊寇贸府
 	if (InPawn == nullptr) return;
 
-	if (UseBlackboard(BlackboardData, Blackboard))
-	{
-		if (RunBehaviorTree(BehaviorTree))
-		{
+	RunBehaviorTree(BehaviorTree);
+	UBlackboardComponent* tempBlackboard = Blackboard;
 
-		}
-	}
+	UseBlackboard(BlackboardData, tempBlackboard);
+	this->Blackboard = tempBlackboard;
+	
 }
 
 void AYS_MonsterAIController::Tick(float DeltaSeconds)

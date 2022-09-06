@@ -127,18 +127,37 @@ void AYS_MonsterBase::KnockBack(AActor* Player)
 
 void AYS_MonsterBase::KnockBackUpdate(float delta)
 {
-	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(DamageMontage))
+	if (!(GetMesh()->GetAnimInstance()->Montage_IsPlaying(basicAttackMontage[0])))
 	{
-		FinalKnockBackLocation = 
+		knockBackCheck = true;
+
+		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(DamageMontage))
+		{
+			FinalKnockBackLocation =
+				FMath::VInterpTo(GetActorLocation(), directionCal, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 10.f);
+			SetActorLocation(FVector(FinalKnockBackLocation.X, FinalKnockBackLocation.Y, GetActorLocation().Z));
+			
+		}
+		
+		
+	}
+	else
+	{
+		FinalKnockBackLocation =
 			FMath::VInterpTo(GetActorLocation(), directionCal, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 10.f);
 		SetActorLocation(FVector(FinalKnockBackLocation.X, FinalKnockBackLocation.Y, GetActorLocation().Z));
+		knockBackCheck = false;
 	}
 }
 
 float AYS_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	KnockBack(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	PlayAnimMontage(DamageMontage);
+	if (knockBackCheck == true)
+	{
+		PlayAnimMontage(DamageMontage);
+	}
+	
 
 	SetDamage(DamageAmount);
 

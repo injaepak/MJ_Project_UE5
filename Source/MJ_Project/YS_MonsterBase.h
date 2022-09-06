@@ -28,6 +28,9 @@ public:
 
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+		bool knockBackCheck = false;
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
@@ -58,7 +61,7 @@ private:
 		UAnimMontage* dieMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		float knockBackDintance = 200.f;
+		float knockBackDintance = 400.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
 		FVector directionCal = {};
@@ -93,6 +96,7 @@ public:
 
 	//공격구현
 	void Attack(UAnimMontage* AttackMontage);
+	float KnockBackdelayTime = 0;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
