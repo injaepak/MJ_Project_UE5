@@ -14,6 +14,7 @@ enum class EPlayerState : uint8
 	Move,
 	Run,
 	Dash,
+	DashAttack,
 	Attack,
 	Defence,
 	Damaged,
@@ -55,6 +56,7 @@ private:
 	void MoveState();
 	void RunState();
 	void DashState();
+	void DashAttackState();
 	void AttackState();
 	void DefenceState();
 	void DamagedState();

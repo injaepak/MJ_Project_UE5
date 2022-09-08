@@ -50,6 +50,11 @@ void UIJ_Player_AnimInstance::Damaged()
 	Montage_Play(baseDamagedMontage);
 }
 
+void UIJ_Player_AnimInstance::DoubleJump()
+{
+	Montage_Play(doubleJumpMontage);
+}
+
 void UIJ_Player_AnimInstance::EvasionForward()
 {
 	Montage_Play(EvasionForwardMontage);

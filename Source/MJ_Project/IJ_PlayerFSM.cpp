@@ -49,6 +49,9 @@ void UIJ_PlayerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case EPlayerState::Attack:
 		AttackState();
 		break;
+	case EPlayerState::DashAttack:
+		DashAttackState();
+		break;
 	case EPlayerState::Defence:
 		DefenceState();
 		break;
@@ -81,6 +84,11 @@ void UIJ_PlayerFSM::DashState()
 	anim->state = m_state;
 }
 
+void UIJ_PlayerFSM::DashAttackState()
+{
+	anim->state = m_state;
+}
+
 void UIJ_PlayerFSM::AttackState()
 {
 	anim->state = m_state;
@@ -93,7 +101,8 @@ void UIJ_PlayerFSM::DefenceState()
 
 void UIJ_PlayerFSM::DamagedState()
 {
-	anim->Damaged();
+	anim->state = m_state;
+
 }
 
 void UIJ_PlayerFSM::DieState()

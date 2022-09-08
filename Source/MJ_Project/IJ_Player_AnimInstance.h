@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		UAnimMontage* killMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		UAnimMontage* doubleJumpMontage;
+
 public:
 
 	void Idle();
@@ -70,6 +73,7 @@ public:
 	void BaseAttack();
 	void DashAttack();
 	void Damaged();
+	void DoubleJump();
 
 	void EvasionForward();
 	void EvasionBack();

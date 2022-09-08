@@ -49,12 +49,11 @@ public:
 		float slowTime = 0.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
-		float maxSlowTime = 0.1f;
+		float maxSlowTime = 1.f;
 
-	FVector myPos;
 	FVector playerPos;
 	FVector knockbackPos;
-	float knockbackValue = 200.f;
+	float knockbackValue = 1000.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
 		bool bDefenceSlowOn = false;

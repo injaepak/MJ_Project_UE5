@@ -32,7 +32,7 @@ void UIJ_PlayerMovement::BeginPlay()
 	Super::BeginPlay();
 
 	// 점프를 수 조절
-	me->JumpMaxCount = 1;
+	me->JumpMaxCount = 2;
 
 	me->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 }
@@ -318,10 +318,11 @@ void UIJ_PlayerMovement::Attack()
 	{
 		me->bIsBaseAttackPlaying = true;
 
-		if (me->playerFSM->m_state == EPlayerState::Idle)
+		if (me->playerFSM->m_state == EPlayerState::Idle || me->playerFSM->m_state == EPlayerState::Attack)
 		{
 			// Attack 상태로 변경
-			me->playerFSM->m_state = EPlayerState::Attack;
+			//me->playerFSM->m_state = EPlayerState::Attack;
+
 
 			if (me->bIsBaseAttackMontagePlaying == false)
 			{
@@ -330,13 +331,13 @@ void UIJ_PlayerMovement::Attack()
 				// 공격 몽타주 실행
 				me->PlayAnimMontage(me->baseAttackMontage);
 			}
-			me->playerFSM->m_state = EPlayerState::Idle;
+			//me->playerFSM->m_state = EPlayerState::Attack;
 		}
 
-		else if (me->playerFSM->m_state == EPlayerState::Dash || me->playerFSM->m_state == EPlayerState::Run)
+		else if (me->playerFSM->m_state == EPlayerState::DashAttack || me->playerFSM->m_state == EPlayerState::Run)
 		{
 			// Attack 상태로 변경
-			me->playerFSM->m_state = EPlayerState::Attack;
+			//me->playerFSM->m_state = EPlayerState::Attack;
 
 			if (me->bIsDashAttackMontagePlaying == false)
 			{
@@ -345,7 +346,7 @@ void UIJ_PlayerMovement::Attack()
 				// 대쉬공격 몽타주 실행
 				me->PlayAnimMontage(me->dashAttackMontage);
 			}
-			me->playerFSM->m_state = EPlayerState::Run;
+			//me->playerFSM->m_state = EPlayerState::Run;
 		}
 
 	}
@@ -384,7 +385,6 @@ void UIJ_PlayerMovement::Evasion(FKey key)
 		me->GetMesh()->GetChildComponent(0)->SetHiddenInGame(true);
 		// 이펙트 활성화
 		me->GetMesh()->GetChildComponent(1)->SetVisibility(true);
-		//me->GetMesh()->GetChildComponent(1)->SetVisibility(true);
 		// 가속방향 회전 false
 		me->GetCharacterMovement()->bOrientRotationToMovement = false;
 		const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
@@ -480,7 +480,14 @@ void UIJ_PlayerMovement::AndroidBotAttackOff()
 void UIJ_PlayerMovement::Jump()
 {
 	if (bIsKillMontage == false)
+	{
 		me->Jump();
+
+		if (me->JumpCurrentCount == 1)
+		{
+			me->playerFSM->anim->DoubleJump();
+		}
+	}
 }
 
 void UIJ_PlayerMovement::StopJumping()

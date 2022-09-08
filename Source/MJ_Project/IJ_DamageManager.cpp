@@ -42,7 +42,7 @@ void UIJ_DamageManager::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		me->SetActorLocation(playerPos);
 
 
-		if (slowTime >= maxSlowTime)
+		if (slowTime <= maxSlowTime)
 		{
 			GetWorld()->GetWorldSettings()->SetTimeDilation(1.f);
 			slowTime = 0.f;
@@ -54,25 +54,24 @@ void UIJ_DamageManager::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UIJ_DamageManager::SetHP(float Damage)
 {
-	if (me->playerFSM->m_state != EPlayerState::Defence)
+	if (me->playerFSM->m_state == EPlayerState::Defence)
 	{
-		hp -= Damage;
-		me->playerFSM->m_state = EPlayerState::Damaged;
-	}
-
-	else if (me->playerFSM->m_state == EPlayerState::Defence)
-	{
-		bDefenceSlowOn = true;
-
-		myPos = me->GetActorLocation();
 		playerPos = me->GetActorLocation();
-		knockbackPos = myPos + me->targetKnockbackLoc * knockbackValue;
+		knockbackPos = playerPos + me->targetKnockbackLoc * knockbackValue;
 
 		GetWorld()->GetWorldSettings()->SetTimeDilation(0.25f);
+
+		bDefenceSlowOn = true;
 	}
+
+	else if (me->playerFSM->m_state != EPlayerState::Defence)
+	{
+		hp -= Damage;
+		me->playerFSM->anim->Damaged();
+	}
+	
 	if (hp <= 0)
 		Die();
-
 }
 
 void UIJ_DamageManager::Die()
