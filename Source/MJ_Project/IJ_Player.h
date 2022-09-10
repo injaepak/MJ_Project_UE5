@@ -20,6 +20,16 @@ class MJ_PROJECT_API AIJ_Player : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UChildActorComponent* MainCamChild;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* SequenceCam;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UChildActorComponent* SequenceChild;
+
+
 public:
 	// Sets default values for this character's properties
 	AIJ_Player();
@@ -147,5 +157,4 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		bool bIsSideView = false;
-
 };

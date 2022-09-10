@@ -133,6 +133,7 @@ void UIJ_PlayerMovement::LookUp(float Rate)
 
 void UIJ_PlayerMovement::MoveForward(float Value)
 {
+
 	// 컨트롤러가 있고, 값이 0 이 아니고, FinishMontage 가 실행되고 있지 않을 때
 	if ((me->Controller != nullptr) && (Value != 0.0f) && (bIsKillMontage == false))
 	{
@@ -148,10 +149,13 @@ void UIJ_PlayerMovement::MoveForward(float Value)
 			me->GetCharacterMovement()->MaxWalkSpeed = 200.f;
 		}
 
-		const FRotator Rotation = me->Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		me->AddMovementInput(Direction, Value);
+		if (me->bIsSideView == false)
+		{
+			const FRotator Rotation = me->Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			me->AddMovementInput(Direction, Value);
+		}
 	}
 }
 
@@ -188,11 +192,6 @@ void UIJ_PlayerMovement::MoveRight(float Value)
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			me->AddMovementInput(Direction, -Value);
 		}
-
-		if (Value > 0.f)
-			me->bIsAndroidLeft = false;
-		else
-			me->bIsAndroidLeft = true;
 	}
 }
 
@@ -200,112 +199,136 @@ void UIJ_PlayerMovement::Dash(FKey key)
 {
 	// 플레이어가 떠있는 상태, 공격, FinishMontage 상태가 아닐 때
 	//(W,S 키는 가속 방향으로 회전, A,D 키는 회전 X), Player의 forwardVector 방향으로 이동, 플레이어의 AnimInstance에 접근해 몽타주 실행
+
+	globalKey = key;
+
+	// 사이드 뷰 시점이 아닐 땐
+	if (me->bIsSideView == false)
+		GeneralDash();
+	else
+		SideViewDash();
+
+
+	dashCurrentTime = 0.f;
+}
+
+
+void UIJ_PlayerMovement::GeneralDash()
+{
 	if (me->GetCharacterMovement()->IsFalling() == false && me->bIsBaseAttackPlaying == false && me->bIsDashPlaying == false && (bIsKillMontage == false))
 	{
 		if (dashCurrentTime >= dashDelayTime)
 		{
 			//me->GetCharacterMovement()->bOrientRotationToMovement = false;
-			FName keyName = key.GetFName();
+			keyName = globalKey.GetFName();
 			me->playerFSM->m_state = EPlayerState::Dash;
 
 			if (me->bIsBaseAttackPlaying == false)
 			{
 				me->bIsDashPlaying = true;
 
-				// 사이드 뷰 시점이 아닐 땐
-				if (me->bIsSideView == false)
+
+				// W 키를 눌렀다면
+				if (keyName == "W")
 				{
-					// W 키를 눌렀다면
-					if (keyName == "W")
+					// 만약 직정 회피상태조건에 맞았다면 직전회피함수를 사용
+					if (me->bIsEvasion == true)
+						Evasion(globalKey);
+					else
 					{
-						// 만약 직정 회피상태조건에 맞았다면 직전회피함수를 사용
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = true;
-							const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
-							me->playerFSM->anim->DashForward();
-						}
-					}
-
-					if (keyName == "S")
-					{
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = true;
-							const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(me->GetActorForwardVector() * 3000, true, true);
-							me->playerFSM->anim->DashBack();
-						}
-					}
-
-					if (keyName == "D")
-					{
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = false;
-							const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
-							me->playerFSM->anim->DashRight();
-						}
-					}
-
-					if (keyName == "A")
-					{
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = false;
-							const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
-							me->playerFSM->anim->DashLeft();
-						}
-
+						me->GetCharacterMovement()->bOrientRotationToMovement = true;
+						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+						me->SetActorRotation(Rotation);
+						me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
+						me->playerFSM->anim->DashForward();
 					}
 				}
 
-				if (me->bIsSideView == true)
+				if (keyName == "S")
 				{
-					if (keyName == "A")
+					if (me->bIsEvasion == true)
+						Evasion(globalKey);
+					else
 					{
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = true;
-							const FRotator Rotation = FRotator(0.f, me->GetMesh()->GetRelativeRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
-							me->playerFSM->anim->DashForward();
-						}
-					}
-
-					if (keyName == "D")
-					{
-						if (me->bIsEvasion == true)
-							Evasion(key);
-						else
-						{
-							me->GetCharacterMovement()->bOrientRotationToMovement = true;
-							const FRotator Rotation = FRotator(0.f, me->GetMesh()->GetRelativeRotation().Yaw, 0.f);
-							me->SetActorRotation(Rotation);
-							me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
-							me->playerFSM->anim->DashForward();
-						}
+						me->GetCharacterMovement()->bOrientRotationToMovement = true;
+						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+						me->SetActorRotation(Rotation);
+						me->LaunchCharacter(me->GetActorForwardVector() * 3000, true, true);
+						me->playerFSM->anim->DashBack();
 					}
 				}
-				dashCurrentTime = 0.f;
+
+				if (keyName == "D")
+				{
+					if (me->bIsEvasion == true)
+						Evasion(globalKey);
+					else
+					{
+						me->GetCharacterMovement()->bOrientRotationToMovement = false;
+						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+						me->SetActorRotation(Rotation);
+						me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
+						me->playerFSM->anim->DashRight();
+					}
+				}
+
+				if (keyName == "A")
+				{
+					if (me->bIsEvasion == true)
+						Evasion(globalKey);
+					else
+					{
+						me->GetCharacterMovement()->bOrientRotationToMovement = false;
+						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+						me->SetActorRotation(Rotation);
+						me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
+						me->playerFSM->anim->DashLeft();
+					}
+
+				}
+
+			}
+		}
+	}
+}
+
+
+void UIJ_PlayerMovement::SideViewDash()
+{
+	if (me->GetCharacterMovement()->IsFalling() == false && me->bIsBaseAttackPlaying == false && me->bIsDashPlaying == false && (bIsKillMontage == false))
+	{
+		if (dashCurrentTime >= dashDelayTime)
+		{
+			//me->GetCharacterMovement()->bOrientRotationToMovement = false;
+			keyName = globalKey.GetFName();
+			me->playerFSM->m_state = EPlayerState::Dash;
+
+			if (keyName == "A")
+			{
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
+				{
+					me->GetCharacterMovement()->bOrientRotationToMovement = true;
+					const FRotator Rotation = FRotator(0.f, me->GetMesh()->GetRelativeRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
+					me->playerFSM->anim->DashForward();
+				}
+			}
+
+			if (keyName == "D")
+			{
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
+				{
+					me->GetCharacterMovement()->bOrientRotationToMovement = true;
+					const FRotator Rotation = FRotator(0.f, me->GetMesh()->GetRelativeRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
+					me->playerFSM->anim->DashForward();
+				}
 			}
 		}
 	}

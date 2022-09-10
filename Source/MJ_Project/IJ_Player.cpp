@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/ChildActorComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -60,6 +61,18 @@ AIJ_Player::AIJ_Player()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = true;
+
+	// 카메라 액션
+	MainCamChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("MainCamChild"));
+	MainCamChild->SetupAttachment(FollowCamera);
+	MainCamChild->GetChildActor();
+
+	SequenceCam = CreateDefaultSubobject<UCameraComponent>(TEXT("SequenceCam"));
+	SequenceCam->SetupAttachment(RootComponent);
+
+	SequenceChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("SequenceChild"));
+	SequenceChild->SetupAttachment(SequenceCam);
+	SequenceChild->GetChildActor();
 
 	// 플레이어 키 입력 컴포넌트
 	playerMovement = CreateDefaultSubobject<UIJ_PlayerMovement>(TEXT("PlayerMovement"));
@@ -145,9 +158,13 @@ float AIJ_Player::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
 	//UE_LOG(LogTemp,Warning,TEXT("ddddddd"));
-	
+
 	if (playerMovement->bIsKillMontage != true)
 	{
+		AActor* MC = MainCamChild->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.2f, EViewTargetBlendFunction::VTBlend_EaseInOut, 1.f);
+
 		// DamageCauser 의 HP가 몇 이하라면 다음 공격 시작시 End 몽타주 실행, 다른 함수를 막음, Damage Causer 에게 End 몽타주 실행시키기, bool값 넘겨주기
 		enemy = DamageCauser;
 
@@ -172,16 +189,12 @@ void AIJ_Player::AndroidBot()
 	rightAndroidBotPos->SetRelativeLocation(newRightLocation);
 
 	// 카메라와 안드로이드가 가까워질 때 반대 방향으로 이동
-	if (bIsAndroidAttack == false)
+	if (FVector::Dist(GetFollowCamera()->GetComponentLocation(), leftAndroidBotPos->GetComponentLocation()) <= 350.f)
 	{
-		if (FVector::Dist(GetFollowCamera()->GetComponentLocation(), leftAndroidBotPos->GetComponentLocation()) <= 350.f)
-		{
-			androidBot->SetRelativeLocation(FMath::Lerp(androidBot->GetRelativeLocation(), rightAndroidBotPos->GetRelativeLocation(), 2.5f * GetWorld()->DeltaTimeSeconds));
-		}
-
-		else
-		{
-			androidBot->SetRelativeLocation(FMath::Lerp(androidBot->GetRelativeLocation(), leftAndroidBotPos->GetRelativeLocation(), 2.5f * GetWorld()->DeltaTimeSeconds));
-		}
+		androidBot->SetRelativeLocation(FMath::Lerp(androidBot->GetRelativeLocation(), rightAndroidBotPos->GetRelativeLocation(), GetWorld()->DeltaTimeSeconds));
+	}
+	else
+	{
+		androidBot->SetRelativeLocation(FMath::Lerp(androidBot->GetRelativeLocation(), leftAndroidBotPos->GetRelativeLocation(), GetWorld()->DeltaTimeSeconds));
 	}
 }

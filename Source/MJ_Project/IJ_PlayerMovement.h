@@ -56,6 +56,13 @@ public:
 
 	void Dash(FKey key);
 
+	void GeneralDash();
+
+	void SideViewDash();
+
+	void Dash_SideView_On();
+	void Dash_SideView_Off();
+
 	void Attack();
 
 	void DefenceOn();
@@ -72,7 +79,6 @@ public:
 
 
 public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		float dashDistance = 5000.f;
 
@@ -96,7 +102,6 @@ public:
 
 
 public:
-
 	UPROPERTY(EditDefaultsOnly, Category = Fire)
 		TSubclassOf<class AIJ_AndroidBotBullet> bulletFactory;
 
@@ -109,4 +114,11 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		bool bIsKillMontage = false;
+
+	UPROPERTY()
+		FName keyName;
+
+	UPROPERTY()
+		FKey globalKey;
+
 };
