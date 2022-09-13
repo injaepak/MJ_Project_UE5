@@ -67,6 +67,11 @@ void UIJ_PlayerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 void UIJ_PlayerFSM::IdleState()
 {
 	anim->state = m_state;
+
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanDefence = true;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::MoveState()
@@ -77,21 +82,40 @@ void UIJ_PlayerFSM::MoveState()
 void UIJ_PlayerFSM::RunState()
 {
 	anim->state = m_state;
+
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanDefence = true;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::DashState()
 {
 	anim->state = m_state;
+
+	anim->bCanAttack = false;
+	anim->bCanDash = true;
+	anim->bCanDefence = false;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::DashAttackState()
 {
 	anim->state = m_state;
+
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanDefence = true;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::AttackState()
 {
 	anim->state = m_state;
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanDefence = true;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::DefenceState()
@@ -103,6 +127,10 @@ void UIJ_PlayerFSM::DamagedState()
 {
 	anim->state = m_state;
 
+	anim->bCanAttack = false;
+	anim->bCanDash = false;
+	anim->bCanDefence = false;
+	anim->bCanDameged = true;
 }
 
 void UIJ_PlayerFSM::DieState()

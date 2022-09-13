@@ -157,4 +157,5 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		bool bIsSideView = false;
+
 };

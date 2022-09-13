@@ -31,6 +31,11 @@ void UIJ_Player_AnimInstance::DashRight()
 	Montage_Play(dashRightMontage);
 }
 
+void UIJ_Player_AnimInstance::Damaged_Off()
+{
+	Montage_Play(damaged_OffMontage);
+}
+
 void UIJ_Player_AnimInstance::Run()
 {
 }

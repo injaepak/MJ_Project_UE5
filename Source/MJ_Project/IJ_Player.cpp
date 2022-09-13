@@ -161,9 +161,10 @@ float AIJ_Player::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 
 	if (playerMovement->bIsKillMontage != true)
 	{
-		AActor* MC = MainCamChild->GetChildActor();
+		/*AActor* MC = MainCamChild->GetChildActor();
 		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.2f, EViewTargetBlendFunction::VTBlend_EaseInOut, 1.f);
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.2f, EViewTargetBlendFunction::VTBlend_EaseInOut, 1.f);*/
+		
 
 		// DamageCauser 의 HP가 몇 이하라면 다음 공격 시작시 End 몽타주 실행, 다른 함수를 막음, Damage Causer 에게 End 몽타주 실행시키기, bool값 넘겨주기
 		enemy = DamageCauser;

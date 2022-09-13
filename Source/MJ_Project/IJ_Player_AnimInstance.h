@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		UAnimMontage* doubleJumpMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		UAnimMontage* damaged_OffMontage;
+
 public:
 
 	void Idle();
@@ -69,6 +72,7 @@ public:
 	void DashBack();
 	void DashLeft();
 	void DashRight();
+	void Damaged_Off();
 	void Run();
 	void BaseAttack();
 	void DashAttack();
@@ -87,4 +91,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		bool bIsDefenceOn = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bIsInAir = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanIdle = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanAttack = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanDash = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanDefence = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanDameged = false;
 };

@@ -202,12 +202,18 @@ void UIJ_PlayerMovement::Dash(FKey key)
 
 	globalKey = key;
 
-	// 사이드 뷰 시점이 아닐 땐
-	if (me->bIsSideView == false)
-		GeneralDash();
-	else
-		SideViewDash();
-
+	if (me->playerFSM->anim->bCanDash == true)
+	{
+		// 사이드 뷰 시점이 아닐 땐
+		if (me->bIsSideView == false)
+			GeneralDash();
+		else
+			SideViewDash();
+	}
+	if (me->playerFSM->m_state == EPlayerState::Damaged)
+	{
+		Damaged_Off();
+	}
 
 	dashCurrentTime = 0.f;
 }
@@ -219,72 +225,66 @@ void UIJ_PlayerMovement::GeneralDash()
 	{
 		if (dashCurrentTime >= dashDelayTime)
 		{
-			//me->GetCharacterMovement()->bOrientRotationToMovement = false;
 			keyName = globalKey.GetFName();
 			me->playerFSM->m_state = EPlayerState::Dash;
+			me->bIsDashPlaying = true;
 
-			if (me->bIsBaseAttackPlaying == false)
+
+			// W 키를 눌렀다면
+			if (keyName == "W")
 			{
-				me->bIsDashPlaying = true;
-
-
-				// W 키를 눌렀다면
-				if (keyName == "W")
+				// 만약 직정 회피상태조건에 맞았다면 직전회피함수를 사용
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
 				{
-					// 만약 직정 회피상태조건에 맞았다면 직전회피함수를 사용
-					if (me->bIsEvasion == true)
-						Evasion(globalKey);
-					else
-					{
-						me->GetCharacterMovement()->bOrientRotationToMovement = true;
-						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-						me->SetActorRotation(Rotation);
-						me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
-						me->playerFSM->anim->DashForward();
-					}
+					me->GetCharacterMovement()->bOrientRotationToMovement = true;
+					const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
+					me->playerFSM->anim->DashForward();
 				}
+			}
 
-				if (keyName == "S")
+			if (keyName == "S")
+			{
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
 				{
-					if (me->bIsEvasion == true)
-						Evasion(globalKey);
-					else
-					{
-						me->GetCharacterMovement()->bOrientRotationToMovement = true;
-						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-						me->SetActorRotation(Rotation);
-						me->LaunchCharacter(me->GetActorForwardVector() * 3000, true, true);
-						me->playerFSM->anim->DashBack();
-					}
+					me->GetCharacterMovement()->bOrientRotationToMovement = true;
+					const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(me->GetActorForwardVector() * 3000, true, true);
+					me->playerFSM->anim->DashBack();
 				}
+			}
 
-				if (keyName == "D")
+			if (keyName == "D")
+			{
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
 				{
-					if (me->bIsEvasion == true)
-						Evasion(globalKey);
-					else
-					{
-						me->GetCharacterMovement()->bOrientRotationToMovement = false;
-						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-						me->SetActorRotation(Rotation);
-						me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
-						me->playerFSM->anim->DashRight();
-					}
+					me->GetCharacterMovement()->bOrientRotationToMovement = false;
+					const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
+					me->playerFSM->anim->DashRight();
 				}
+			}
 
-				if (keyName == "A")
+			if (keyName == "A")
+			{
+				if (me->bIsEvasion == true)
+					Evasion(globalKey);
+				else
 				{
-					if (me->bIsEvasion == true)
-						Evasion(globalKey);
-					else
-					{
-						me->GetCharacterMovement()->bOrientRotationToMovement = false;
-						const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
-						me->SetActorRotation(Rotation);
-						me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
-						me->playerFSM->anim->DashLeft();
-					}
-
+					me->GetCharacterMovement()->bOrientRotationToMovement = false;
+					const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+					me->SetActorRotation(Rotation);
+					me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
+					me->playerFSM->anim->DashLeft();
 				}
 
 			}
@@ -292,14 +292,12 @@ void UIJ_PlayerMovement::GeneralDash()
 	}
 }
 
-
 void UIJ_PlayerMovement::SideViewDash()
 {
 	if (me->GetCharacterMovement()->IsFalling() == false && me->bIsBaseAttackPlaying == false && me->bIsDashPlaying == false && (bIsKillMontage == false))
 	{
 		if (dashCurrentTime >= dashDelayTime)
 		{
-			//me->GetCharacterMovement()->bOrientRotationToMovement = false;
 			keyName = globalKey.GetFName();
 			me->playerFSM->m_state = EPlayerState::Dash;
 
@@ -334,45 +332,88 @@ void UIJ_PlayerMovement::SideViewDash()
 	}
 }
 
-void UIJ_PlayerMovement::Attack()
+void UIJ_PlayerMovement::Damaged_Off()
 {
-	// 대쉬, FinishMontage가 실행중이 아닐 때
-	if ((me->bIsDashPlaying == false) && (bIsKillMontage == false))
+	if (me->GetCharacterMovement()->IsFalling() == false && me->bIsBaseAttackPlaying == false && me->bIsDashPlaying == false && (bIsKillMontage == false))
 	{
-		me->bIsBaseAttackPlaying = true;
 
-		if (me->playerFSM->m_state == EPlayerState::Idle || me->playerFSM->m_state == EPlayerState::Attack)
+		keyName = globalKey.GetFName();
+		me->playerFSM->m_state = EPlayerState::Idle;
+
+		me->bIsDashPlaying = true;
+
+		if (keyName == "W")
 		{
-			// Attack 상태로 변경
-			//me->playerFSM->m_state = EPlayerState::Attack;
-
-
-			if (me->bIsBaseAttackMontagePlaying == false)
-			{
-				me->bIsBaseAttackMontagePlaying = true;
-
-				// 공격 몽타주 실행
-				me->PlayAnimMontage(me->baseAttackMontage);
-			}
-			//me->playerFSM->m_state = EPlayerState::Attack;
+			me->GetCharacterMovement()->bOrientRotationToMovement = true;
+			const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+			me->SetActorRotation(Rotation);
+			me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
+			me->playerFSM->anim->Damaged_Off();
 		}
 
-		else if (me->playerFSM->m_state == EPlayerState::DashAttack || me->playerFSM->m_state == EPlayerState::Run)
+		if (keyName == "S")
 		{
-			// Attack 상태로 변경
-			//me->playerFSM->m_state = EPlayerState::Attack;
-
-			if (me->bIsDashAttackMontagePlaying == false)
-			{
-				me->bIsDashAttackMontagePlaying = true;
-
-				// 대쉬공격 몽타주 실행
-				me->PlayAnimMontage(me->dashAttackMontage);
-			}
-			//me->playerFSM->m_state = EPlayerState::Run;
+			me->GetCharacterMovement()->bOrientRotationToMovement = true;
+			const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+			me->SetActorRotation(Rotation);
+			me->LaunchCharacter(me->GetActorForwardVector() * 3000, true, true);
+			me->playerFSM->anim->Damaged_Off();
 		}
+
+		if (keyName == "D")
+		{
+			me->GetCharacterMovement()->bOrientRotationToMovement = false;
+			const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+			me->SetActorRotation(Rotation);
+			me->LaunchCharacter(me->GetActorRightVector() * 3000, true, true);
+			me->playerFSM->anim->Damaged_Off();
+		}
+
+		if (keyName == "A")
+		{
+			me->GetCharacterMovement()->bOrientRotationToMovement = false;
+			const FRotator Rotation = FRotator(0.f, me->Controller->GetControlRotation().Yaw, 0.f);
+			me->SetActorRotation(Rotation);
+			me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
+			me->playerFSM->anim->Damaged_Off();
+		}
+
 
 	}
+}
+
+void UIJ_PlayerMovement::Attack()
+{
+	if (me->playerFSM->anim->bCanAttack == true)
+	{
+		// 대쉬, FinishMontage가 실행중이 아닐 때
+		if ((me->bIsDashPlaying == false) && (bIsKillMontage == false))
+		{
+			me->bIsBaseAttackPlaying = true;
+
+			if (me->playerFSM->m_state == EPlayerState::Idle || me->playerFSM->m_state == EPlayerState::Attack)
+			{
+				if (me->bIsBaseAttackMontagePlaying == false)
+				{
+					me->bIsBaseAttackMontagePlaying = true;
+
+					// 공격 몽타주 실행
+					me->PlayAnimMontage(me->baseAttackMontage);
+				}
+			}
+
+			else if (me->playerFSM->m_state == EPlayerState::DashAttack || me->playerFSM->m_state == EPlayerState::Run)
+			{
+				if (me->bIsDashAttackMontagePlaying == false)
+				{
+					me->bIsDashAttackMontagePlaying = true;
+					// 대쉬공격 몽타주 실행
+					me->PlayAnimMontage(me->dashAttackMontage);
+				}
+			}
+		}
+	}
+
 }
 
 void UIJ_PlayerMovement::DefenceOn()
@@ -453,7 +494,6 @@ void UIJ_PlayerMovement::Evasion(FKey key)
 		}
 		me->bIsTakeDamage = false;
 		me->currentEvasionTime = 0.f;
-
 	}
 }
 

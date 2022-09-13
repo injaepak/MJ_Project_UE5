@@ -11,7 +11,7 @@
 AIJ_BlendTriggerVolume::AIJ_BlendTriggerVolume()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	OverlapVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("CameraProximityVolume"));
 	OverlapVolume->SetupAttachment(RootComponent);

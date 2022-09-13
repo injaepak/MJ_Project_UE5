@@ -60,8 +60,7 @@ public:
 
 	void SideViewDash();
 
-	void Dash_SideView_On();
-	void Dash_SideView_Off();
+	void Damaged_Off();
 
 	void Attack();
 
