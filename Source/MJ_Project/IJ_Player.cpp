@@ -54,7 +54,7 @@ AIJ_Player::AIJ_Player()
 	// 카메라 붐
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
+	CameraBoom->TargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength, 200.f, 500.f);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	// 메인 카메라
@@ -63,16 +63,22 @@ AIJ_Player::AIJ_Player()
 	FollowCamera->bUsePawnControlRotation = true;
 
 	// 카메라 액션
-	MainCamChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("MainCamChild"));
-	MainCamChild->SetupAttachment(FollowCamera);
-	MainCamChild->GetChildActor();
+	cameraChild_L = CreateDefaultSubobject<UChildActorComponent>(TEXT("CameraChild_L"));
+	cameraChild_L->SetupAttachment(FollowCamera);
 
-	SequenceCam = CreateDefaultSubobject<UCameraComponent>(TEXT("SequenceCam"));
-	SequenceCam->SetupAttachment(RootComponent);
+	cameraChild_M = CreateDefaultSubobject<UChildActorComponent>(TEXT("CameraChild_M"));
+	cameraChild_M->SetupAttachment(FollowCamera);
 
-	SequenceChild = CreateDefaultSubobject<UChildActorComponent>(TEXT("SequenceChild"));
-	SequenceChild->SetupAttachment(SequenceCam);
-	SequenceChild->GetChildActor();
+	cameraChild_R = CreateDefaultSubobject<UChildActorComponent>(TEXT("CameraChild_R"));
+	cameraChild_R->SetupAttachment(FollowCamera);
+
+	// 카메라 BlendCollision
+	cameraCollision_L = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CameraCollision_L"));
+	cameraCollision_L->SetupAttachment(RootComponent);
+	cameraCollision_M = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CameraCollision_M"));
+	cameraCollision_M->SetupAttachment(RootComponent);
+	cameraCollision_R = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CameraCollision_R"));
+	cameraCollision_R->SetupAttachment(RootComponent);
 
 	// 플레이어 키 입력 컴포넌트
 	playerMovement = CreateDefaultSubobject<UIJ_PlayerMovement>(TEXT("PlayerMovement"));
@@ -117,6 +123,13 @@ AIJ_Player::AIJ_Player()
 void AIJ_Player::BeginPlay()
 {
 	Super::BeginPlay();
+	cameraCollision_L->OnComponentBeginOverlap.AddDynamic(this, &AIJ_Player::OnCollisionEnter);
+	cameraCollision_M->OnComponentBeginOverlap.AddDynamic(this, &AIJ_Player::OnCollisionEnter);
+	cameraCollision_R->OnComponentBeginOverlap.AddDynamic(this, &AIJ_Player::OnCollisionEnter);
+	cameraCollision_L->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
+	cameraCollision_M->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
+	cameraCollision_R->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
+	
 }
 
 // Called every frame
@@ -197,5 +210,68 @@ void AIJ_Player::AndroidBot()
 	else
 	{
 		androidBot->SetRelativeLocation(FMath::Lerp(androidBot->GetRelativeLocation(), leftAndroidBotPos->GetRelativeLocation(), GetWorld()->DeltaTimeSeconds));
+	}
+}
+
+void AIJ_Player::OnCollisionEnter(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
+	{
+		AActor* MC = cameraChild_M->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp, Warning, TEXT("GO_M"));
+	}
+
+	else if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
+	{
+		AActor* MC = cameraChild_R->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp,Warning,TEXT("GO_R"));
+	}
+	else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
+	{
+		AActor* MC = cameraChild_L->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp, Warning, TEXT("GO_L"));
+	}
+}
+
+void AIJ_Player::EndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndexs)
+{
+	if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
+	{
+		AActor* MC = cameraChild_M->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp, Warning, TEXT("GO_M1"));
+	}
+	else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
+	{
+		AActor* MC = cameraChild_M->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp, Warning, TEXT("GO_M2"));
+	}
+	else if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
+	{
+		AActor* MC = cameraChild_M->GetChildActor();
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
+		UE_LOG(LogTemp, Warning, TEXT("GO_M3"));
 	}
 }

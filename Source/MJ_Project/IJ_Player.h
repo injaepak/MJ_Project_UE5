@@ -20,16 +20,6 @@ class MJ_PROJECT_API AIJ_Player : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UChildActorComponent* MainCamChild;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UCameraComponent* SequenceCam;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UChildActorComponent* SequenceChild;
-
-
 public:
 	// Sets default values for this character's properties
 	AIJ_Player();
@@ -85,6 +75,24 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
 		class UBoxComponent* interactionZone;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* cameraCollision_L;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* cameraCollision_M;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* cameraCollision_R;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+		class UChildActorComponent* cameraChild_L;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+		class UChildActorComponent* cameraChild_M;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
+		class UChildActorComponent* cameraChild_R;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
@@ -158,4 +166,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		bool bIsSideView = false;
 
+	UFUNCTION()
+		void OnCollisionEnter(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void EndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndexs);
 };
