@@ -82,5 +82,6 @@ void UIJ_Player_AnimInstance::EvasionRight()
 
 void UIJ_Player_AnimInstance::kill()
 {
+	//UAnimMontage* killMontageArr[4] = { killMontage_1, killMontage_2, killMontage_3, killMontage_4};
 	Montage_Play(killMontage);
 }

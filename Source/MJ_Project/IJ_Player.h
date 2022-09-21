@@ -14,6 +14,7 @@ class MJ_PROJECT_API AIJ_Player : public ACharacter
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
@@ -60,6 +61,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
 		class UIJ_DamageManager* damageManager;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Setting)
+		class AIJ_ActionCameraManager* actionCam;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AndroidBot)
 		class USceneComponent* leftAndroidBotPos;
@@ -134,6 +139,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AndroidBot)
 		bool bIsAndroidAttack = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AndroidBot)
+		bool bIsCameraBlending = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AndroidBot)
 		FVector androidSinLoc_L;
 
@@ -162,6 +170,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
 	void AndroidBot();
+
+	void Evasion();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		bool bIsSideView = false;

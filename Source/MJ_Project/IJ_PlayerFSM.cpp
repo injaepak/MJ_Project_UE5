@@ -43,8 +43,17 @@ void UIJ_PlayerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	case EPlayerState::Move:
 		MoveState();
 		break;
+	case EPlayerState::Jump:
+		JumpState();
+		break;
+	case EPlayerState::RunJump:
+		JumpState();
+		break;
 	case EPlayerState::Run:
 		RunState();
+		break;
+	case EPlayerState::Dash:
+		DashState();
 		break;
 	case EPlayerState::Attack:
 		AttackState();
@@ -67,9 +76,16 @@ void UIJ_PlayerFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 void UIJ_PlayerFSM::IdleState()
 {
 	anim->state = m_state;
+	
+	if (me->bIsCameraBlending == false)
+	{
+		APlayerController* PlayerCharacterController = Cast<APlayerController>(me->GetController());
+		PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 0.25f, EViewTargetBlendFunction::VTBlend_Linear, 2.f, true);
+	}
 
 	anim->bCanAttack = true;
 	anim->bCanDash = true;
+	anim->bCanJump = true;
 	anim->bCanDefence = true;
 	anim->bCanDameged = true;
 }
@@ -83,8 +99,15 @@ void UIJ_PlayerFSM::RunState()
 {
 	anim->state = m_state;
 
+	if (me->bIsCameraBlending == false)
+	{
+	APlayerController* PlayerCharacterController = Cast<APlayerController>(me->GetController());
+	PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 0.25f, EViewTargetBlendFunction::VTBlend_Linear, 2.f, true);
+	}
+
 	anim->bCanAttack = true;
 	anim->bCanDash = true;
+	anim->bCanJump = true;
 	anim->bCanDefence = true;
 	anim->bCanDameged = true;
 }
@@ -95,6 +118,27 @@ void UIJ_PlayerFSM::DashState()
 
 	anim->bCanAttack = false;
 	anim->bCanDash = true;
+	anim->bCanJump = true;
+	anim->bCanDefence = false;
+	anim->bCanDameged = false;
+}
+
+void UIJ_PlayerFSM::JumpState()
+{
+	anim->state = m_state;
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanJump = true;
+	anim->bCanDefence = false;
+	anim->bCanDameged = true;
+}
+
+void UIJ_PlayerFSM::RunJumpState()
+{
+	anim->state = m_state;
+	anim->bCanAttack = true;
+	anim->bCanDash = true;
+	anim->bCanJump = true;
 	anim->bCanDefence = false;
 	anim->bCanDameged = true;
 }
@@ -105,6 +149,7 @@ void UIJ_PlayerFSM::DashAttackState()
 
 	anim->bCanAttack = true;
 	anim->bCanDash = true;
+	anim->bCanJump = false;
 	anim->bCanDefence = true;
 	anim->bCanDameged = true;
 }
@@ -114,6 +159,7 @@ void UIJ_PlayerFSM::AttackState()
 	anim->state = m_state;
 	anim->bCanAttack = true;
 	anim->bCanDash = true;
+	anim->bCanJump = false;
 	anim->bCanDefence = true;
 	anim->bCanDameged = true;
 }
@@ -121,6 +167,7 @@ void UIJ_PlayerFSM::AttackState()
 void UIJ_PlayerFSM::DefenceState()
 {
 	anim->state = m_state;
+	anim->bCanJump = false;
 }
 
 void UIJ_PlayerFSM::DamagedState()
@@ -129,6 +176,7 @@ void UIJ_PlayerFSM::DamagedState()
 
 	anim->bCanAttack = false;
 	anim->bCanDash = false;
+	anim->bCanJump = false;
 	anim->bCanDefence = false;
 	anim->bCanDameged = true;
 }

@@ -59,6 +59,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		UAnimMontage* killMontage;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		UAnimMontage* killMontage_2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		UAnimMontage* killMontage_3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		UAnimMontage* killMontage_4;*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		UAnimMontage* doubleJumpMontage;
 
@@ -108,4 +117,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
 		bool bCanDameged = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Setting)
+		bool bCanJump = false;
 };

@@ -82,6 +82,17 @@ void UIJ_PlayerMovement::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		me->GetMesh()->GetChildComponent(1)->SetVisibility(false);
 	}
 
+	if ((me->playerFSM->m_state == EPlayerState::RunJump || me->playerFSM->m_state == EPlayerState::Jump) && me->playerFSM->anim->bIsInAir == false)
+	{
+		if (me->playerFSM->m_state == EPlayerState::RunJump)
+		{
+			me->playerFSM->m_state = EPlayerState::Run;
+		}
+		else
+		{
+			me->playerFSM->m_state = EPlayerState::Idle;
+		}
+	}
 	dashCurrentTime += DeltaTime;
 }
 
@@ -243,6 +254,9 @@ void UIJ_PlayerMovement::GeneralDash()
 					me->SetActorRotation(Rotation);
 					me->LaunchCharacter(FVector(me->GetActorForwardVector().X, me->GetActorForwardVector().Y, 0.f) * 3000, true, true);
 					me->playerFSM->anim->DashForward();
+
+
+					//me->playerFSM->anim->Montage_IsPlaying(dash)
 				}
 			}
 
@@ -377,8 +391,6 @@ void UIJ_PlayerMovement::Damaged_Off()
 			me->LaunchCharacter(me->GetActorRightVector() * -3000, true, true);
 			me->playerFSM->anim->Damaged_Off();
 		}
-
-
 	}
 }
 
@@ -413,7 +425,6 @@ void UIJ_PlayerMovement::Attack()
 			}
 		}
 	}
-
 }
 
 void UIJ_PlayerMovement::DefenceOn()
@@ -542,13 +553,25 @@ void UIJ_PlayerMovement::AndroidBotAttackOff()
 
 void UIJ_PlayerMovement::Jump()
 {
-	if (bIsKillMontage == false)
+	if (me->playerFSM->anim->bCanJump == true)
 	{
-		me->Jump();
-
-		if (me->JumpCurrentCount == 1)
+		if (bIsKillMontage == false)
 		{
-			me->playerFSM->anim->DoubleJump();
+			me->Jump();
+			if (me->playerFSM->m_state != EPlayerState::Run)
+			{
+				me->playerFSM->m_state = EPlayerState::Jump;
+			}
+			else
+			{
+				me->playerFSM->m_state = EPlayerState::RunJump;
+			}
+			
+
+			if (me->JumpCurrentCount == 1)
+			{
+				me->playerFSM->anim->DoubleJump();
+			}
 		}
 	}
 }

@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "IJ_ActionCameraManager.h"
 #include "IJ_PlayerMovement.h"
 #include "IJ_PlayerFSM.h"
 #include "IJ_Player_AnimInstance.h"
@@ -54,7 +55,7 @@ AIJ_Player::AIJ_Player()
 	// 카메라 붐
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength, 200.f, 500.f);
+	CameraBoom->TargetArmLength = FMath::Clamp(CameraBoom->TargetArmLength, 200.f, 400.f);
 	CameraBoom->bUsePawnControlRotation = true;
 
 	// 메인 카메라
@@ -129,7 +130,8 @@ void AIJ_Player::BeginPlay()
 	cameraCollision_L->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
 	cameraCollision_M->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
 	cameraCollision_R->OnComponentEndOverlap.AddDynamic(this, &AIJ_Player::EndOverlap);
-	
+
+	actionCam = Cast<AIJ_ActionCameraManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AIJ_ActionCameraManager::StaticClass()));
 }
 
 // Called every frame
@@ -139,23 +141,8 @@ void AIJ_Player::Tick(float DeltaTime)
 
 	AndroidBot();
 
-	// 직전 회피 타이밍 로직
-	if (bIsTakeDamage == true)
-	{
-		currentEvasionTime += DeltaTime;
-		if (currentEvasionTime <= canEvasionTime)
-		{
-			bIsEvasion = true;
-		}
+	Evasion();
 
-		if (currentEvasionTime >= canEvasionTime)
-		{
-			bIsEvasion = false;
-			damageManager->SetHP(damageAmountValue);
-			currentEvasionTime = 0.f;
-			bIsTakeDamage = false;
-		}
-	}
 }
 
 // Called to bind functionality to input
@@ -174,11 +161,6 @@ float AIJ_Player::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 
 	if (playerMovement->bIsKillMontage != true)
 	{
-		/*AActor* MC = MainCamChild->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.2f, EViewTargetBlendFunction::VTBlend_EaseInOut, 1.f);*/
-		
-
 		// DamageCauser 의 HP가 몇 이하라면 다음 공격 시작시 End 몽타주 실행, 다른 함수를 막음, Damage Causer 에게 End 몽타주 실행시키기, bool값 넘겨주기
 		enemy = DamageCauser;
 
@@ -213,65 +195,77 @@ void AIJ_Player::AndroidBot()
 	}
 }
 
+void AIJ_Player::Evasion()
+{
+	// 직전 회피 타이밍 로직
+	if (bIsTakeDamage == true)
+	{
+		currentEvasionTime += GetWorld()->DeltaTimeSeconds;
+		if (currentEvasionTime <= canEvasionTime)
+		{
+			bIsEvasion = true;
+		}
+
+		if (currentEvasionTime >= canEvasionTime)
+		{
+			bIsEvasion = false;
+			damageManager->SetHP(damageAmountValue);
+			currentEvasionTime = 0.f;
+			bIsTakeDamage = false;
+		}
+	}
+}
+
 void AIJ_Player::OnCollisionEnter(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
+	if (bIsSideView == false)
 	{
-		AActor* MC = cameraChild_M->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
+		if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
+		{
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 1.f, EViewTargetBlendFunction::VTBlend_Linear);
+		}
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp, Warning, TEXT("GO_M"));
+		else if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
+		{
+			AActor* MC = cameraChild_R->GetChildActor();
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(MC, 1.f, EViewTargetBlendFunction::VTBlend_Linear);
+			bIsCameraBlending = true;
+		}
+		else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
+		{
+			AActor* MC = cameraChild_L->GetChildActor();
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(MC, 1.f, EViewTargetBlendFunction::VTBlend_Linear);
+			bIsCameraBlending = true;
+		}
 	}
 
-	else if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
-	{
-		AActor* MC = cameraChild_R->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp,Warning,TEXT("GO_R"));
-	}
-	else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
-	{
-		AActor* MC = cameraChild_L->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp, Warning, TEXT("GO_L"));
-	}
 }
 
 void AIJ_Player::EndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndexs)
 {
-	if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
+	if (bIsSideView == false)
 	{
-		AActor* MC = cameraChild_M->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp, Warning, TEXT("GO_M1"));
+		if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
+		{
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 1.f, EViewTargetBlendFunction::VTBlend_Linear);
+			bIsCameraBlending = false;
+		}
+		else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
+		{
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 1.f, EViewTargetBlendFunction::VTBlend_Linear);
+			bIsCameraBlending = false;
+		}
+		else if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
+		{
+			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
+			PlayerCharacterController->SetViewTargetWithBlend(PlayerCharacterController->GetPawn(), 0.2f, EViewTargetBlendFunction::VTBlend_Linear);
+			bIsCameraBlending = false;
+		}
 	}
-	else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
-	{
-		AActor* MC = cameraChild_M->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp, Warning, TEXT("GO_M2"));
-	}
-	else if (OverlappedComp == cameraCollision_R && OverlappedComp == cameraCollision_L)
-	{
-		AActor* MC = cameraChild_M->GetChildActor();
-		APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
-		PlayerCharacterController->SetViewTargetWithBlend(MC, 0.25f, EViewTargetBlendFunction::VTBlend_EaseIn, 2.f, true);
-
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("")));
-		UE_LOG(LogTemp, Warning, TEXT("GO_M3"));
-	}
+	
 }

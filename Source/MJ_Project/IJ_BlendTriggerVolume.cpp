@@ -37,7 +37,6 @@ void AIJ_BlendTriggerVolume::NotifyActorBeginOverlap(AActor* OtherActor)
 			// 카메라 블랜드
 			PlayerCharacterController->SetViewTargetWithBlend(sideCamera, CameraBlendTime, EViewTargetBlendFunction::VTBlend_Cubic);
 			player->bIsSideView = true;
-
 		}
 	}
 }
