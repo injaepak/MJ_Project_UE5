@@ -51,7 +51,7 @@ void AYS_MonsterBase::BeginPlay()
 	player = Cast<AIJ_Player>(UGameplayStatics::GetActorOfClass(GetWorld(), AIJ_Player::StaticClass()));
 	playerAnim = Cast<UIJ_Player_AnimInstance>(player->GetMesh()->GetAnimInstance());
 
-	// ¿Œ≈Õ∑∫º«
+	// Ïù∏ÌÑ∞Î†âÏÖò
 	//SetActorLocation(player->interactionZone->GetRelativeLocation()/* + FVector(0.f, 100.f, 0.f)*/);
 	//SetActorRotation(player->interactionZone->GetRelativeRotation());
 	HpBar->InitWidget();
@@ -117,7 +117,7 @@ void AYS_MonsterBase::KnockBack(AActor* Player)
 {
 	
 	ACharacter* PlayerCharacter = Cast<ACharacter>(Player);
-	//----------------------------------------------∞ËªÍ------------------------------------------------------------------------
+	//----------------------------------------------Í≥ÑÏÇ∞------------------------------------------------------------------------
 	FVector findPlayerVec = PlayerCharacter->GetActorForwardVector();
 	directionCal = GetActorLocation() + findPlayerVec * knockBackDintance;
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -127,42 +127,24 @@ void AYS_MonsterBase::KnockBack(AActor* Player)
 
 void AYS_MonsterBase::KnockBackUpdate(float delta)
 {
-	if (!(GetMesh()->GetAnimInstance()->Montage_IsPlaying(basicAttackMontage[0])))
-	{
-		knockBackCheck = true;
-
-		if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(DamageMontage))
-		{
-			FinalKnockBackLocation =
-				FMath::VInterpTo(GetActorLocation(), directionCal, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 10.f);
-			SetActorLocation(FVector(FinalKnockBackLocation.X, FinalKnockBackLocation.Y, GetActorLocation().Z));
-			
-		}
-		
-		
-	}
-	else
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(DamageMontage))
 	{
 		FinalKnockBackLocation =
 			FMath::VInterpTo(GetActorLocation(), directionCal, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 10.f);
 		SetActorLocation(FVector(FinalKnockBackLocation.X, FinalKnockBackLocation.Y, GetActorLocation().Z));
-		knockBackCheck = false;
 	}
 }
 
 float AYS_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	KnockBack(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (knockBackCheck == true)
-	{
-		PlayAnimMontage(DamageMontage);
-	}
-	
+	PlayAnimMontage(DamageMontage);
+
 
 	SetDamage(DamageAmount);
 
-	// ¿Œ≈Õ∑∫º«
-	if (GetHpRatio() <= 0.1)// ∏∏æ‡ √º∑¬¿Ã ¿œ¡§ºˆ¡ÿ ¿Ã«œ∏È Ω««‡
+	// Ïù∏ÌÑ∞Î†âÏÖò
+	if (GetHpRatio() <= 0.1)// ÎßåÏïΩ Ï≤¥Î†•Ïù¥ ÏùºÏ†ïÏàòÏ§Ä Ïù¥ÌïòÎ©¥ Ïã§Ìñâ
 	{
 		SetActorLocation(player->interactionZone->GetComponentLocation());
 		SetActorRotation(player->interactionZone->GetComponentRotation());
