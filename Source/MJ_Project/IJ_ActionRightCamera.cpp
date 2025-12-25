@@ -16,6 +16,8 @@ AIJ_ActionRightCamera::AIJ_ActionRightCamera()
 
 	sideCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("SideCamera"));
 	sideCamera->SetupAttachment(rootComp);
+
+	sideCamera->SetConstraintAspectRatio(false);
 }
 
 // Called when the game starts or when spawned

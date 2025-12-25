@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include <Kismet/GameplayStatics.h>
 #include "UObject/ConstructorHelpers.h"
+#include "Components/AudioComponent.h"
 
 
 
@@ -20,12 +21,28 @@ AMJ_ProjectGameMode::AMJ_ProjectGameMode()
 
 		bulletPoolSize = 100;
 	}
+
+	BackgroundMusicComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AUDIOCOMP"));
+
+	static ConstructorHelpers::FObjectFinder<USoundBase>BGM(TEXT("SoundWave'/Game/YS/Sound/Midnight_Trace_-_Jimena_Contreras.Midnight_Trace_-_Jimena_Contreras'"));
+	if (BGM.Succeeded())
+	{
+		BackgroundMusic = BGM.Object;
+	}
+
+	BackgroundMusicComponent->SetSound(BackgroundMusic);
 }
 
 
 void AMJ_ProjectGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	BackgroundMusicComponent->Play();
+
+
+
 
 	player = Cast<AIJ_Player>(UGameplayStatics::GetActorOfClass(GetWorld(), AIJ_Player::StaticClass()));
 
@@ -36,6 +53,13 @@ void AMJ_ProjectGameMode::BeginPlay()
 
 		AddBullet(bullet);
 	}
+}
+
+void AMJ_ProjectGameMode::ChangeBackgroundSound(USoundBase* NewSound)
+{
+	BackgroundMusicComponent->Stop();
+	BackgroundMusicComponent->SetSound(NewSound);
+	BackgroundMusicComponent->Play();
 }
 
 // 4. Pool에 들어간 Bullet은 모두 비활성화함

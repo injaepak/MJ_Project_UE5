@@ -10,6 +10,7 @@
 #include "Components/WidgetComponent.h"
 #include "YS_MonsterWidget.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AYS_MonsterBase::AYS_MonsterBase()
 {
@@ -39,6 +40,17 @@ AYS_MonsterBase::AYS_MonsterBase()
 		HpBar->SetDrawSize(FVector2D(80.f, 10.f));
 	}
 
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem>NG(TEXT("NiagaraSystem'/Game/Migrated/Looped_NS_Blood_Burst_Large_ZeroGravity.Looped_NS_Blood_Burst_Large_ZeroGravity'"));
+	if (NG.Succeeded())
+	{
+		HitEffect = NG.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase>HS(TEXT("SoundCue'/Game/Sword_Fighting_SFX/Wavs/Destroy_Flesh_5_Cue.Destroy_Flesh_5_Cue'"));
+	if (HS.Succeeded())
+	{
+		HitSound = HS.Object;
+	}
 
 	
 }
@@ -142,6 +154,29 @@ float AYS_MonsterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 
 
 	SetDamage(DamageAmount);
+
+
+	//피격 이펙트
+	if (HitEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			HitEffect,
+			GetActorLocation(),
+			GetActorRotation()
+		);
+	}
+
+	//피격 사운드
+	if (HitSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			GetWorld(),
+			HitSound,
+			GetActorLocation()
+		);
+	}
+
 
 	// 인터렉션
 	if (GetHpRatio() <= 0.1)// 만약 체력이 일정수준 이하면 실행

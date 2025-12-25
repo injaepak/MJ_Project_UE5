@@ -121,6 +121,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UIJ_Player_AnimInstance* playerAnim;
 
+	//파티클 이펙트
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | VFX", meta = (AllowPrivateAccess = "true"))
+		class UNiagaraSystem* HitEffect;
+
+		//사운드 이펙트
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat | Sound")
+		USoundBase* HitSound;
+
 
 	///HP
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))

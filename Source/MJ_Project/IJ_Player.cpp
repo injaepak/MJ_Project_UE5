@@ -229,6 +229,11 @@ void AIJ_Player::OnCollisionEnter(class UPrimitiveComponent* OverlappedComp, cla
 		else if (OverlappedComp == cameraCollision_L && OverlappedComp != cameraCollision_R)
 		{
 			AActor* MC = cameraChild_R->GetChildActor();
+			UCameraComponent* TargetCam = MC->FindComponentByClass<UCameraComponent>();
+			if (TargetCam)
+			{
+				TargetCam->SetConstraintAspectRatio(false);
+			}
 			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
 			PlayerCharacterController->SetViewTargetWithBlend(MC, 1.f, EViewTargetBlendFunction::VTBlend_Linear);
 			bIsCameraBlending = true;
@@ -236,6 +241,11 @@ void AIJ_Player::OnCollisionEnter(class UPrimitiveComponent* OverlappedComp, cla
 		else if (OverlappedComp == cameraCollision_R && OverlappedComp != cameraCollision_L)
 		{
 			AActor* MC = cameraChild_L->GetChildActor();
+			UCameraComponent* TargetCam = MC->FindComponentByClass<UCameraComponent>();
+			if (TargetCam)
+			{
+				TargetCam->SetConstraintAspectRatio(false);
+			}
 			APlayerController* PlayerCharacterController = Cast<APlayerController>(GetController());
 			PlayerCharacterController->SetViewTargetWithBlend(MC, 1.f, EViewTargetBlendFunction::VTBlend_Linear);
 			bIsCameraBlending = true;

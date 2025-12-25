@@ -17,6 +17,11 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+	void ChangeBackgroundSound(USoundBase* NewSound);
+
+
+
 	// 총알 활성화시키는 함수
 	void SetBulletActive(AActor* bulletActor, bool isActive);
 
@@ -44,6 +49,12 @@ public:
 
 private:
 	AIJ_AndroidBotBullet* CreateBullet();
+
+	UPROPERTY()
+	TObjectPtr<class UAudioComponent> BackgroundMusicComponent;
+
+	UPROPERTY()
+	TObjectPtr<USoundBase> BackgroundMusic;
 };
 
 
