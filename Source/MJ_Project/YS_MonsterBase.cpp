@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "YS_MonsterWidget.h"
+#include "NiagaraFunctionLibrary.h"
 
 AYS_MonsterBase::AYS_MonsterBase()
 {
@@ -51,9 +52,8 @@ void AYS_MonsterBase::BeginPlay()
 	player = Cast<AIJ_Player>(UGameplayStatics::GetActorOfClass(GetWorld(), AIJ_Player::StaticClass()));
 	playerAnim = Cast<UIJ_Player_AnimInstance>(player->GetMesh()->GetAnimInstance());
 
-	// 인터렉션
-	//SetActorLocation(player->interactionZone->GetRelativeLocation()/* + FVector(0.f, 100.f, 0.f)*/);
-	//SetActorRotation(player->interactionZone->GetRelativeRotation());
+	
+
 	HpBar->InitWidget();
 	auto HpWidget = Cast<UYS_MonsterWidget>(HpBar->GetUserWidgetObject());
 	if (HpWidget)

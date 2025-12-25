@@ -26,54 +26,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
-
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool knockBackCheck = false;
-
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		float currentHealth = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		float maxHealth = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool bCanMontageAttack = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool Die = false;
-
-
-	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		class UBehaviorTree* behaviorTree;
-
-	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		TArray<UAnimMontage*> basicAttackMontage;
-
-	
-	
-	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* DamageMontage;
-
-	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		UAnimMontage* dieMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		float knockBackDintance = 400.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		FVector directionCal = {};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		FVector FinalKnockBackLocation = {};
-
-
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool bIsBoss = false;
+	
 
 	//기본공격 몽타주 불러오기
 	UAnimMontage* GetBasicAttackMontage();
@@ -84,8 +39,8 @@ public:
 	FORCEINLINE float GetCurrentHealth() const { return currentHealth; }
 	FORCEINLINE float GetHpRatio() { return currentHealth / maxHealth; }
 
-	//비헤이비어트리 불러오기
-	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return behaviorTree; }
+
+	FORCEINLINE bool GetIsBoss() const { return bIsBoss; }
 
 
 	//몬스 체력 Set
@@ -96,7 +51,6 @@ public:
 
 	//공격구현
 	void Attack(UAnimMontage* AttackMontage);
-	float KnockBackdelayTime = 0;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
@@ -106,19 +60,70 @@ public:
 	void KnockBack(AActor* Player);
 	void KnockBackUpdate(float delta);
 
-	UPROPERTY(VisibleAnywhere)
+
+public:
+	//바인딩
+	FOnHpChanged OnHpChanged;
+
+protected:
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bIsBoss = false;
+
+	float KnockBackdelayTime = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool knockBackCheck = false;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	float currentHealth = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bCanMontageAttack = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool Die = false;
+
+
+
+	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	TArray<UAnimMontage*> basicAttackMontage;
+
+
+
+	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DamageMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* dieMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	float knockBackDintance = 400.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	FVector directionCal = {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Combat, meta = (AllowPrivateAccess = "true"))
+	FVector FinalKnockBackLocation = {};
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 		class UWidgetComponent* lockOn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class AIJ_Player* player;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UIJ_Player_AnimInstance* playerAnim;
 
 
 	///HP
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* HpBar;
 
-	FOnHpChanged OnHpChanged;
 };

@@ -51,10 +51,18 @@ void AYS_MonsterAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//비헤이비어트리 실행
+	RunBehaviorTree(BehaviorTree);
+
+	//블랙보드 실행
+	UBlackboardComponent* tempBlackboard = Blackboard;
+	UseBlackboard(BlackboardData, tempBlackboard);
+	this->Blackboard = tempBlackboard;
+
 
 	//보스인지 체크
 	AYS_MonsterBase* const monster = Cast<AYS_MonsterBase>(GetPawn());
-	GetBlackboardComponent()->SetValueAsBool(FName(TEXT("bIsBoss")), monster->bIsBoss);
+	GetBlackboardComponent()->SetValueAsBool(FName(TEXT("bIsBoss")), monster->GetIsBoss());
 
 }
 
@@ -65,11 +73,7 @@ void AYS_MonsterAIController::OnPossess(APawn* InPawn)
 	////에외처리
 	if (InPawn == nullptr) return;
 
-	RunBehaviorTree(BehaviorTree);
-	UBlackboardComponent* tempBlackboard = Blackboard;
-
-	UseBlackboard(BlackboardData, tempBlackboard);
-	this->Blackboard = tempBlackboard;
+	
 	
 }
 
@@ -81,6 +85,8 @@ void AYS_MonsterAIController::Tick(float DeltaSeconds)
 
 FRotator AYS_MonsterAIController::GetControlRotation() const
 {
+
+	Super::GetControlRotation();
 
 	//예외처리
 	if (GetPawn() == nullptr)

@@ -14,7 +14,7 @@ class MJ_PROJECT_API UYS_MonsterWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public :
-		void BindHp(class AYS_MonsterBase* Monster);
+	void BindHp(class AYS_MonsterBase* Monster);
 
 	void UpdateHp();
 
